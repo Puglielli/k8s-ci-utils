@@ -1,5 +1,5 @@
 {
-  "name": "kubernetes-utils",
+  "name": "k8s-ci-utils",
   "version": "0.0.1",
   "description": "tools to be used to extract values from json kubernetes",
   "main": "index.js",
@@ -15,5 +15,13 @@
     "@kubernetes/client-node": "^0.17.1",
     "commander": "^9.4.0",
     "fs": "^0.0.1-security"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Puglielli/k8s-ci-utils.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Puglielli/k8s-ci-utils/issues"
+  },
+  "homepage": "https://github.com/Puglielli/k8s-ci-utils#readme"
 }
