@@ -59,7 +59,5 @@ async function getRevisionAndImage(namespace, name, containerName = undefined, f
 }
 
 
-
-
 validOptions('namespace', 'deployment', 'filename')
 getRevisionAndImage(options.namespace, options.deployment, undefined, options.filename)
