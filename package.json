@@ -1,10 +1,12 @@
 {
   "name": "k8s-ci-utils",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "tools to be used to extract values from json kubernetes",
   "main": "index.js",
+  "bin": "./bin/k8s-ci-utils",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "bin": "echo \"#!/usr/bin/env node\" > ./bin/k8s-ci-utils && cat index.js >> ./bin/k8s-ci-utils"
   },
   "keywords": [
     "kubernetes"
