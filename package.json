@@ -1,0 +1,19 @@
+{
+  "name": "kubernetes-utils",
+  "version": "0.0.1",
+  "description": "tools to be used to extract values from json kubernetes",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "kubernetes"
+  ],
+  "author": "Puglielli",
+  "license": "MIT",
+  "dependencies": {
+    "@kubernetes/client-node": "^0.17.1",
+    "commander": "^9.4.0",
+    "fs": "^0.0.1-security"
+  }
+}
