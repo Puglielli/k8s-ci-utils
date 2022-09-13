@@ -13,7 +13,7 @@ class Rollback {
     cmd
       .command('generate-file')
       .requiredOption('-n, --namespace <string>', 'Kubernetes namespace.')
-      .requiredOption('-d, --deployment <string>', 'Kubernetes deployment name.')
+      .requiredOption('-d, --deployment <string...>', 'Kubernetes deployment name.')
       .requiredOption('-f, --filename <string>', 'Rollback file name.')
       .option('-c, --container <string>', 'Kubernetes container name.')
 
@@ -32,32 +32,69 @@ class Rollback {
   getExec = (commands) => commands.filter(i => i.name() == "exec")[0]
   opts = (commands) => this.getGenerateFile(commands).opts()
 
-  generateFile = async (options) => {
-    const res = await this.k8s.readNamespacedDeployment(options.deployment, options.namespace)
-
-    const containers = res.body.spec.template.spec.containers
-
-    const item = {
+  buildItem = (options, deployment, body) => {
+    const containers = body?.spec?.template?.spec?.containers
+    return {
       cluster: options.cluster,
       namespace: options.namespace,
-      deployment: options.deployment,
-      revision: res.body.metadata.annotations["deployment.kubernetes.io/revision"],
-      image: ((options.container) ? containers.filter(c => c.name == options.container)[0]?.image : containers[0].image) ?? null
+      deployment: deployment,
+      revision: body?.metadata?.annotations["deployment.kubernetes.io/revision"] ?? null,
+      image: (options.container ? containers?.filter(c => c.name == options.container)[0]?.image : containers?.pop(0)?.image) ?? null
     }
+  }
 
-    let listItems = []
+  generateFile = async (options) => {
+    let newItems = []
+
+    options.deployment = (typeof options.deployment == 'string') ? [options.deployment] : options.deployment
+
+    for await (const deploy of options.deployment) {
+
+      await this.k8s.readNamespacedDeployment(deploy, options.namespace)
+        .then(data => {
+
+          const body = data.body
+
+          newItems.push(
+            this.buildItem(
+              options,
+              deploy,
+              body
+            )
+          )
+
+        }).catch(err => {
+
+          newItems.push(
+            this.buildItem(
+              options,
+              deploy,
+              null
+            )
+          )
+
+          const body = err.body
+          console.error(
+            {
+              status: body.status,
+              code: body.code,
+              reason: body.reason,
+              message: body.message,
+            }
+          )
+        }
+      )
+    }
 
     if (this.fs.existsSync(options.filename)) {
       const str = this.fs.readFileSync(options.filename, 'utf8')
-
-      listItems = parse(str) ?? listItems
+      
+      newItems = parse(str)?.concat(newItems) ?? newItems
     }
-    
-    listItems.push(item)
 
     this.fs.writeFile(
       options.filename,
-      JSON.stringify(listItems, undefined, 2),
+      JSON.stringify(newItems, undefined, 2),
       (err) => { if (err) throw err }
     )
   }
