@@ -1,24 +1,7 @@
 const fs = require('fs')
 const commander = require('commander')
 const k8s = require('@kubernetes/client-node')
-
-commander
-.usage('<argument> [options]')
-.argument('generate-rollback', 'Gera o arquivo de rollback')
-.option('-n, --namespace <string>', 'Kubernetes namespace.')
-.option('-d, --deployment <string>', 'Kubernetes deployment name.')
-.option('-f, --filename <string>', 'Rollback file name.')
-.version('1.0.0', '-v, --version')
-.parse(process.argv)
-
-const options = commander.opts()
-
-const validOptions = (...keys) => {
-  const optionsNotFound = keys.filter(key => options[key] == undefined)
-
-  if (optionsNotFound.length > 0) throw new Error(`The following flags were not passed: --${optionsNotFound.join(' --')}`)
-}
-
+const Rollback = require('./rollback')
 
 // Kubernetes-client Apis > [App, Core]
 const kc = new k8s.KubeConfig()
@@ -26,38 +9,24 @@ kc.loadFromDefault()
 const k8sApp = kc.makeApiClient(k8s.AppsV1Api)
 const k8sCore = kc.makeApiClient(k8s.CoreV1Api)
 
+const rollback = new Rollback(k8sApp, fs)
+const flags = new commander.Command()
 
-async function scale(namespace, name, replicas) {
-  const res = await k8sApp.readNamespacedDeployment(name, namespace)
-  const deployment = res.body
+flags.version('1.0.0', '-v, --version')
+flags.addCommand(rollback.buildCommand())
+flags.parse(process.argv)
 
-  deployment.spec.replicas = replicas
 
-  await k8sApp.replaceNamespacedDeployment(name, namespace, deployment)
+const exec = () => {
+  flags.commands.forEach(subCommand => {
+      
+    if (subCommand.name() == "rollback" && rollback.existGenerateFile(subCommand.commands)) {
+      const options = rollback.opts(subCommand.commands)
+
+      options.cluster = kc.getCurrentContext()
+      rollback.generateFile(options)
+    }
+  })
 }
 
-// scale(options.namespace, options.deployment, options.replicas)
-
-
-async function getRevisionAndImage(namespace, name, containerName = undefined, filename) {
-  const res = await k8sApp.readNamespacedDeployment(name, namespace)
-
-  const containers = res.body.spec.template.spec.containers
-
-  const itens = {
-    cluster: kc.getCurrentContext(),
-    namespace: namespace,
-    revision: res.body.metadata.annotations["deployment.kubernetes.io/revision"],
-    image: (containerName == undefined) ? containers[0].image : containers.filter(c => c.name == containerName)[0].image
-  }
-
-  fs.writeFile(
-    filename,
-    JSON.stringify(itens, undefined, 2),
-    (err) => { if (err) throw err }
-  )
-}
-
-
-validOptions('namespace', 'deployment', 'filename')
-getRevisionAndImage(options.namespace, options.deployment, undefined, options.filename)
+exec()
