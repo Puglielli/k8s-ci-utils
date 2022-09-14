@@ -1,7 +1,7 @@
 const commander = require('commander')
 const k8s = require('@kubernetes/client-node')
 const Rollback = require('./rollback')
-const package = require('./package.json')
+const package = require('./package')
 
 // Kubernetes-client Apis > [App, Core]
 const kc = new k8s.KubeConfig()
