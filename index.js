@@ -1,6 +1,7 @@
 const commander = require('commander')
 const k8s = require('@kubernetes/client-node')
 const Rollback = require('./rollback')
+const package = require('./package.json')
 
 // Kubernetes-client Apis > [App, Core]
 const kc = new k8s.KubeConfig()
@@ -11,7 +12,7 @@ const k8sCore = kc.makeApiClient(k8s.CoreV1Api)
 const rollback = new Rollback(k8sApp)
 const flags = new commander.Command()
 
-flags.version('1.0.0', '-v, --version')
+flags.version(`${package.version}`, '-v, --version')
 flags.addCommand(rollback.buildCommand())
 flags.parse(process.argv)
 

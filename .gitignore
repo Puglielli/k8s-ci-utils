@@ -1,4 +1,9 @@
+## Node Modules ##
 node_modules/
 
+## Logger Files ##
 stdout.log
 stderr.log
+
+## Temp Folder ##
+tmp/
