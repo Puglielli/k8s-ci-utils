@@ -37,6 +37,10 @@ class Rollback {
   getExec = (commands) => commands.filter(i => i.name() == "exec")[0]
   opts = (commands) => this.getGenerateFile(commands).opts()
 
+  getImageByContainers = (containers, options, deployment) =>
+    containers?.filter(container => [options.container, deployment].includes(container.name))?.pop(0)?.image
+
+
   buildItem = (options, deployment, body) => {
     const containers = body?.spec?.template?.spec?.containers
     return {
@@ -44,7 +48,7 @@ class Rollback {
       namespace: options.namespace,
       deployment: deployment,
       revision: body?.metadata?.annotations["deployment.kubernetes.io/revision"] ?? null,
-      image: (options.container ? containers?.filter(c => c.name == options.container)[0]?.image : containers?.pop(0)?.image) ?? null
+      image: this.getImageByContainers(containers, options, deployment) ?? null
     }
   }
 
