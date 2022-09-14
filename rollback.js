@@ -40,7 +40,6 @@ class Rollback {
   getImageByContainers = (containers, options, deployment) =>
     containers?.filter(container => [options.container, deployment].includes(container.name))?.pop(0)?.image
 
-
   buildItem = (options, deployment, body) => {
     const containers = body?.spec?.template?.spec?.containers
     return {

@@ -1,6 +1,6 @@
 {
   "name": "k8s-ci-utils",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": "tools to be used to extract values from json kubernetes",
   "main": "index.js",
   "bin": "./bin/k8s-ci-utils",
