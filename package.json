@@ -6,7 +6,7 @@
   "bin": "./bin/k8s-ci-utils",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "bin": "echo \"#!/usr/bin/env node \n\n const { exec } = require('../index')() \" > ./bin/k8s-ci-utils",
+    "bin": "echo \"#!/usr/bin/env node \n\n require('../index')() \" > ./bin/k8s-ci-utils",
     "push": "git push origin main",
     "publish": "npm run bin && npm run push && npm publish"
   },

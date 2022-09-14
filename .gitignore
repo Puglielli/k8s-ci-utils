@@ -7,3 +7,6 @@ stderr.log
 
 ## Temp Folder ##
 tmp/
+
+## Ignore files TGZ ##
+*.tgz
